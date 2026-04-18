@@ -1,6 +1,8 @@
 ﻿import QtQuick 2.15
 import QtQuick.Controls 2.15
-import QtWayland.Compositor 1.15
+import QtWayland.Compositor
+import QtWayland.Compositor.XdgShell
+import QtWayland.Compositor.WlShell
 import QtMultiProcessSystem 1.0 as MPS
 import QtMultiProcessSystem.Internal 1.0
 import QtMultiProcessSystem.WatchDog 1.0
@@ -72,8 +74,8 @@ WaylandCompositor {
     }
 
     WlShell {
-        onWlShellSurfaceCreated: {
-            shellSurface.titleChanged.connect(function() {
+        onWlShellSurfaceCreated: (shellSurface) => {
+            shellSurface.titleChanged.connect(() => {
                 var item = root.add(shellSurface.title, shellSurface)
                 if (!item)
                     return
@@ -88,26 +90,26 @@ WaylandCompositor {
     }
 
     XdgShell {
-        id: shell
-        onPong: xdgWatchDog.pong(serial)
-        onToplevelCreated: {
-            toplevel.titleChanged.connect(function() {
-                var item = root.add(toplevel.title, xdgSurface)
-                if (!item)
-                    return
-                toplevel.sendConfigure(Qt.size(item.width, item.height), [])
-                item.handleResized.connect(function(width, height) {
-                    if (width < 0 || height < 0)
-                        return
-                    toplevel.sendConfigure(Qt.size(width, height), [])
-                })
-            })
-        }
+       id: shell
+       onPong: xdgWatchDog.pong(serial)
+       onToplevelCreated: (toplevel, XdgSurface) => {
+           toplevel.titleChanged.connect(() => {
+               var item = root.add(toplevel.title, xdgSurface)
+               if (!item)
+                   return
+               toplevel.sendConfigure(Qt.size(item.width, item.height), [])
+               item.handleResized.connect((width, height) => {
+                   if (width < 0 || height < 0)
+                       return
+                   toplevel.sendConfigure(Qt.size(width, height), [])
+               })
+           })
+       }
     }
 
     XdgShellWatchDog {
-        id: xdgWatchDog
-        manager: typeof watchDogManager === 'undefined' ? null : watchDogManager
+       id: xdgWatchDog
+       manager: typeof watchDogManager === 'undefined' ? null : watchDogManager
     }
     SystemdWatchDog {
         id: systemdWatchDog
