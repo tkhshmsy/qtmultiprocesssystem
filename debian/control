@@ -1,0 +1,11 @@
+Source: pyreneedrive-qtmultiprocesssystem
+Section: utils
+Priority: optional
+Maintainer: Pyrenee / Signal-Slot <masaya.takahashi@signal-slot.co.jp>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.4
+
+Package: pyreneedrive-qtmultiprocesssystem
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: QtMultiProcessSystem for PyreneeDrive

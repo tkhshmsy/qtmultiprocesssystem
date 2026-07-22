@@ -1,0 +1,45 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+export CPPFLAGS:=$(shell dpkg-buildflags --get CPPFLAGS)
+export CFLAGS:=$(shell dpkg-buildflags --get CFLAGS) $(CPPFLAGS)
+export CXXFLAGS:=$(shell dpkg-buildflags --get CXXFLAGS) $(CPPFLAGS)
+export LDFLAGS:=$(shell dpkg-buildflags --get LDFLAGS)
+
+export QMAKE_CFLAGS_RELEASE:=$(CFLAGS)
+export QMAKE_CFLAGS_DEBUG:=$(CFLAGS)
+export QMAKE_CXXFLAGS_RELEASE:=$(CXXFLAGS)
+export QMAKE_CXXFLAGS_DEBUG:=$(CXXFLAGS)
+export QMAKE_LFLAGS_RELEASE:=$(LDFLAGS)
+export QMAKE_LFLAGS_DEBUG:=$(LDFLAGS)
+export QMAKE_STRIP:=":"
+
+export PREFIX:="/opt/qt/6"
+export Qt6_DIR:="/opt/qt/6"
+
+DEB_BUILD_OPTIONS += nocheck
+
+# don't use /usr/share/perl5/Debian/Debhelper/Buildsystem/qmake.pm for this package
+# because qmake '-nocache' option is set.
+override_dh_auto_configure:
+	dh_auto_configure --builddirectory=build -- -DCMAKE_INSTALL_PREFIX=$(PREFIX) -DCMAKE_BUILD_TYPE=Release
+
+override_dh_auto_clean:
+	rm -rf build
+
+override_dh_auto_build:
+	dh_auto_build --builddirectory=build
+
+override_dh_auto_install:
+	dh_auto_install --builddirectory=build
+
+override_dh_shlibdeps:
+	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info -l$(Qt6_DIR)/lib
+
+override_dh_usrlocal:
+
+%:
+	dh $@
